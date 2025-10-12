@@ -1,8 +1,9 @@
+# app/services/auth.py
 from typing import Optional, Dict
 import app.db as db
+from app.utils.io import ask
 
-def login() -> Dict:
-    from app.utils.io import ask
+def login(current_user: Optional[Dict] = None) -> Dict:
     username = ask("Username")
     password = ask("Password")
     user = db.users.get(username)
@@ -10,7 +11,7 @@ def login() -> Dict:
         raise ValueError("Login failed. Check username/password.")
     return user
 
-def logout() -> None:
+def logout(current_user: Optional[Dict] = None) -> None:
     return None
 
 def is_admin(current_user: Optional[Dict]) -> bool:
