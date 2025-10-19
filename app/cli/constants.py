@@ -15,8 +15,8 @@ MENU_TITLES = {
 # menu actions (ids -> label)
 ACTIONS = {
     LOGIN_MENU: {
-        "0.1": "Login",
-        "0.9": "Exit",
+        "1": "Login",
+        "2": "Exit",
     },
     MAIN_MENU: {
         "1.1": "Manage Users (admin only)",
