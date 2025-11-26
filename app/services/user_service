@@ -1,0 +1,72 @@
+# app/services/user_service.py
+from typing import List
+
+from rich.table import Table
+
+from app.domain import User
+import app.database as database
+
+
+class UnsupportedUserOperationError(Exception):
+    """Raised when a user operation fails for some reason."""
+    pass
+
+
+def get_all_users() -> List[User]:
+    """Fetch all users from the database."""
+    session = None
+    try:
+        session = database.get_session()
+        users = session.query(User).all()
+        return users
+    except Exception as e:
+        raise UnsupportedUserOperationError(
+            f"Failed to retrieve users due to error: {str(e)}"
+        )
+    finally:
+        session.close() if session else None
+
+
+def build_users_table(users: List[User]) -> Table:
+    """Build a rich Table for displaying users (matches your prof’s style)."""
+    table = Table(title="Users")
+    table.add_column("Username", justify="right", style="cyan", no_wrap=True)
+    table.add_column("First Name", style="magenta")
+    table.add_column("Last Name", style="magenta")
+    table.add_column("Role", justify="center")
+    table.add_column("Balance", justify="right", style="green")
+
+    for user in users:
+        table.add_row(
+            user.username,
+            user.first_name,
+            user.last_name,
+            user.role,
+            f"{user.balance:0.2f}",
+        )
+    return table
+
+
+def update_user_balance(username: str, new_balance: float) -> str:
+    """Example of an update method similar to your prof’s screenshot."""
+    session = None
+    try:
+        session = database.get_session()
+        user = session.query(User).filter_by(username=username).one_or_none()
+        if not user:
+            raise UnsupportedUserOperationError(
+                f"User with username {username} does not exist."
+            )
+
+        user.balance = new_balance
+        session.commit()
+        return f"Updated balance for user {username} to ${new_balance:0.2f}"
+    except Exception as e:
+        if session:
+            session.rollback()
+        # wrap in your custom error, like your prof did
+        raise UnsupportedUserOperationError(
+            f"Failed to update user balance due to error: {str(e)}"
+        )
+    finally:
+        session.close() if session else None

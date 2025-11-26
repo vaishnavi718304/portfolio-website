@@ -1,0 +1,20 @@
+# app/cli/input_collector.py
+from typing import Dict
+
+
+def collect_inputs(fields: Dict[str, str]) -> Dict[str, str]:
+    """
+    fields example:
+      {
+        "Username": "username",
+        "Password": "password",
+        "First Name": "first_name",
+        "Last Name": "last_name",
+        "Balance": "balance",
+      }
+    """
+    result: Dict[str, str] = {}
+    for label, key in fields.items():
+        value = input(f"{label}: ").strip()
+        result[key] = value
+    return result

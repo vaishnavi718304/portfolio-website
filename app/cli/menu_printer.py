@@ -35,3 +35,9 @@ def get_choice(prompt: str = "Select an option (enter the id): ") -> str:
 def print_error(message: str) -> None:
     """Pretty error message."""
     console.print(f"[bold red]✖ {message}[/bold red]")
+
+
+
+
+
+
