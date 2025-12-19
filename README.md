@@ -1,39 +1,14 @@
-# portfolio-website
 
 
-A console-only portfolio management application built for Assignment 1.
-All interaction happens in the terminal and menus/tables are rendered with the rich library.
-How to Run
+# Assignment 3: Flask web service
 
-Requires Python 3.9+.
+## Run the app
 
-macOS / Linux
+```bash
+export DB_USER="root"
+export DB_PASSWORD="<your_mysql_password>"
+export DB_HOST="localhost"
+export DB_PORT="3306"
+export DB_NAME="portfolio_app"
 
-python3 -m venv .venv
-
-source .venv/bin/activate
-
-pip install -r requirements.txt
-
-python -m app.main
-
-
-
-Windows (PowerShell)
-py -m venv .venv
-
-.\.venv\Scripts\Activate.ps1
-
-pip install -r requirements.txt
-
-py -m app.main
-
-
-
-Seed Credentials
-
-Admin: admin / admin123
-
-User: alice / alice123
-
-(You can create more users from Manage Users.)
+PORT=5001 python3 -m app.main
