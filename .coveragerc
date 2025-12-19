@@ -1,0 +1,12 @@
+[run]
+source = app
+omit =
+    app/cli/*
+    app/main.py
+    app/db.py
+    app/utils/ids.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
