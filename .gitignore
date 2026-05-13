@@ -10,3 +10,4 @@ venv/
 instance/
 *.db
 frontend/node_modules/
+frontend/node_modules/
