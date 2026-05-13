@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from pydantic import ValidationError
 from werkzeug.exceptions import HTTPException
 
@@ -26,6 +27,7 @@ def create_app(config):
 
     db.init_app(app)
     cache.init_app(app)
+    CORS(app)
 
     app.register_blueprint(user_bp, url_prefix='/users')
     app.register_blueprint(portfolio_bp, url_prefix='/portfolios')

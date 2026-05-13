@@ -1,10 +1,7 @@
 from __future__ import annotations
-
 from typing import TYPE_CHECKING, List
-
 from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.db import db
 
 if TYPE_CHECKING:
@@ -13,17 +10,15 @@ if TYPE_CHECKING:
 
 class Portfolio(db.Model):
     __tablename__ = 'portfolio'
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(30), nullable=False)
     description: Mapped[str] = mapped_column(String(500), nullable=True)
     owner: Mapped[str] = mapped_column(String(30), ForeignKey('user.username'), nullable=False)
 
     investments: Mapped[List['Investment']] = relationship('Investment', back_populates='portfolio', lazy='selectin')
-
     user: Mapped['User'] = relationship('User', foreign_keys=[owner], back_populates='portfolios', lazy='selectin')
-
     transactions: Mapped[List['Transaction']] = relationship('Transaction', back_populates='portfolio', lazy='selectin')
-
     access_grants: Mapped[List['PortfolioAccess']] = relationship(
         'PortfolioAccess',
         back_populates='portfolio',
@@ -53,8 +48,17 @@ class Portfolio(db.Model):
         for investment in self.investments:
             investments.append(
                 {
+                    'id': investment.id,
                     'ticker': investment.ticker,
                     'quantity': investment.quantity,
+                }
+            )
+        access_grants = []
+        for grant in self.access_grants:
+            access_grants.append(
+                {
+                    'username': grant.username,
+                    'role': grant.role,
                 }
             )
         return {
@@ -64,4 +68,5 @@ class Portfolio(db.Model):
             'owner': self.owner,
             'investments_count': len(self.investments),
             'investments': investments,
+            'access_grants': access_grants,
         }

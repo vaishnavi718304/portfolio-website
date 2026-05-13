@@ -1,17 +1,26 @@
-import pytest
+from unittest.mock import patch
+
+
+def _patch_auth(username: str = 'admin'):
+    return patch('app.auth.auth.validate_token', return_value={'username': username})
+
+
+def _auth_headers(username: str = 'admin') -> dict:
+    return {'Authorization': f'Bearer {username}-token'}
 
 
 def test_create_user_validation_missing_username(client):
-    response = client.post(
-        '/users/',
-        json={
-            'password': 'secret',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'balance': 100.0,
-        },
-    )
-
+    with _patch_auth():
+        response = client.post(
+            '/users/',
+            headers=_auth_headers(),
+            json={
+                'password': 'secret',
+                'firstname': 'Test',
+                'lastname': 'User',
+                'balance': 100.0,
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
@@ -19,17 +28,18 @@ def test_create_user_validation_missing_username(client):
 
 
 def test_create_user_validation_negative_balance(client):
-    response = client.post(
-        '/users/',
-        json={
-            'username': 'user1',
-            'password': 'secret',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'balance': -1,
-        },
-    )
-
+    with _patch_auth():
+        response = client.post(
+            '/users/',
+            headers=_auth_headers(),
+            json={
+                'username': 'user1',
+                'password': 'secret',
+                'firstname': 'Test',
+                'lastname': 'User',
+                'balance': -1,
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
@@ -37,32 +47,34 @@ def test_create_user_validation_negative_balance(client):
 
 
 def test_create_user_validation_extra_field(client):
-    response = client.post(
-        '/users/',
-        json={
-            'username': 'user1',
-            'password': 'secret',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'balance': 100.0,
-            'unexpected': 'x',
-        },
-    )
-
+    with _patch_auth():
+        response = client.post(
+            '/users/',
+            headers=_auth_headers(),
+            json={
+                'username': 'user1',
+                'password': 'secret',
+                'firstname': 'Test',
+                'lastname': 'User',
+                'balance': 100.0,
+                'unexpected': 'x',
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
 
 
 def test_create_portfolio_validation_missing_name(client):
-    response = client.post(
-        '/portfolios/',
-        json={
-            'username': 'admin',
-            'description': 'Test portfolio',
-        },
-    )
-
+    with _patch_auth():
+        response = client.post(
+            '/portfolios/',
+            headers=_auth_headers(),
+            json={
+                'username': 'admin',
+                'description': 'Test portfolio',
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
@@ -70,14 +82,15 @@ def test_create_portfolio_validation_missing_name(client):
 
 
 def test_buy_trade_validation_missing_ticker(client):
-    response = client.post(
-        '/trades/buy',
-        json={
-            'portfolio_id': 1,
-            'quantity': 2,
-        },
-    )
-
+    with _patch_auth():
+        response = client.post(
+            '/trades/buy',
+            headers=_auth_headers(),
+            json={
+                'portfolio_id': 1,
+                'quantity': 2,
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
@@ -85,15 +98,16 @@ def test_buy_trade_validation_missing_ticker(client):
 
 
 def test_buy_trade_validation_invalid_quantity(client):
-    response = client.post(
-        '/trades/buy',
-        json={
-            'portfolio_id': 1,
-            'ticker': 'AAPL',
-            'quantity': 0,
-        },
-    )
-
+    with _patch_auth():
+        response = client.post(
+            '/trades/buy',
+            headers=_auth_headers(),
+            json={
+                'portfolio_id': 1,
+                'ticker': 'AAPL',
+                'quantity': 0,
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
@@ -101,15 +115,16 @@ def test_buy_trade_validation_invalid_quantity(client):
 
 
 def test_sell_trade_validation_missing_sale_price(client):
-    response = client.post(
-        '/trades/sell',
-        json={
-            'portfolio_id': 1,
-            'ticker': 'AAPL',
-            'quantity': 1,
-        },
-    )
-
+    with _patch_auth():
+        response = client.post(
+            '/trades/sell',
+            headers=_auth_headers(),
+            json={
+                'portfolio_id': 1,
+                'ticker': 'AAPL',
+                'quantity': 1,
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
@@ -117,15 +132,17 @@ def test_sell_trade_validation_missing_sale_price(client):
 
 
 def test_update_balance_validation_negative_new_balance(client):
-    response = client.put(
-        '/users/update-balance',
-        json={
-            'username': 'admin',
-            'new_balance': -10,
-        },
-    )
-
+    with _patch_auth():
+        response = client.put(
+            '/users/update-balance',
+            headers=_auth_headers(),
+            json={
+                'username': 'admin',
+                'new_balance': -10,
+            },
+        )
     assert response.status_code == 422
     body = response.get_json()
     assert body['error'] == 'ValidationError'
     assert 'new_balance' in body['detail']
+    

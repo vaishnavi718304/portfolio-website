@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from app.models import Portfolio, PortfolioAccess, User
+from app.service.alpha_vantage_client import SecurityQuote
 
 
 def _auth_headers(username: str) -> dict:
@@ -98,16 +99,24 @@ def test_viewer_can_view_but_cannot_trade(client, db_session):
 def test_manager_can_trade_but_cannot_delete_portfolio(client, db_session):
     portfolio = _seed_authorization_data(db_session)
 
+    mock_quote = SecurityQuote(
+        ticker='AAPL',
+        date='2026-05-12',
+        price=150.00,
+        issuer='Apple Inc.',
+    )
+
     with _patch_auth('manager'):
-        trade_response = client.post(
-            '/trades/buy',
-            headers=_auth_headers('manager'),
-            json={
-                'portfolio_id': portfolio.id,
-                'ticker': 'AAPL',
-                'quantity': 1,
-            },
-        )
+        with patch('app.service.trade_service.get_quote', return_value=mock_quote):
+            trade_response = client.post(
+                '/trades/buy',
+                headers=_auth_headers('manager'),
+                json={
+                    'portfolio_id': portfolio.id,
+                    'ticker': 'AAPL',
+                    'quantity': 1,
+                },
+            )
         delete_response = client.delete(
             f'/portfolios/{portfolio.id}',
             headers=_auth_headers('manager'),

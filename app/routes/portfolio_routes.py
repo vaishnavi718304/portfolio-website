@@ -4,7 +4,7 @@ import app.service.portfolio_access_service as portfolio_access_service
 import app.service.portfolio_service as portfolio_service
 import app.service.transaction_service as transaction_service
 import app.service.user_service as user_service
-from app.auth import authenticate_request, require_auth
+from app.auth import require_auth
 from app.db import db
 from app.schemas import AssignPortfolioAccessRequest, CreatePortfolioRequest
 
@@ -45,9 +45,9 @@ def get_portfolios_by_user(username):
 
 
 @portfolio_bp.route('/', methods=['POST'])
+@require_auth
 def create_portfolio():
     payload = CreatePortfolioRequest.model_validate(request.get_json() or {})
-    authenticate_request()
 
     if g.current_user != payload.username:
         return jsonify({'error': 'Forbidden', 'detail': 'You may only create portfolios for yourself'}), 403

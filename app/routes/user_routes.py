@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 
 import app.service.transaction_service as transaction_service
 import app.service.user_service as user_service
-from app.auth import authenticate_request, require_auth
+from app.auth import require_auth
 from app.db import db
 from app.schemas import CreateUserRequest, UpdateBalanceRequest
 
@@ -26,10 +26,9 @@ def get_user(username):
 
 
 @user_bp.route('/', methods=['POST'])
+@require_auth
 def create_user():
     payload = CreateUserRequest.model_validate(request.get_json() or {})
-    authenticate_request()
-
     user_service.create_user(
         username=payload.username,
         password=payload.password,
@@ -42,10 +41,9 @@ def create_user():
 
 
 @user_bp.route('/update-balance', methods=['PUT'])
+@require_auth
 def update_balance():
     payload = UpdateBalanceRequest.model_validate(request.get_json() or {})
-    authenticate_request()
-
     user_service.update_user_balance(
         username=payload.username,
         new_balance=payload.new_balance,

@@ -1,7 +1,7 @@
 from typing import List
-
 from app.db import db
 from app.models import Portfolio, User
+from app.models.Transaction import Transaction
 
 
 class UnsupportedPortfolioOperationError(Exception):
@@ -17,7 +17,6 @@ def create_portfolio(name: str, description: str, user: User) -> int:
         raise UnsupportedPortfolioOperationError(
             f'Invalid input[name:{name}, description:{description}, user:{user}]. Please try again.'
         )
-
     portfolio = Portfolio(name=name, description=description, user=user)
     db.session.add(portfolio)
     db.session.flush()
@@ -27,7 +26,6 @@ def create_portfolio(name: str, description: str, user: User) -> int:
 def get_portfolios_by_user(user: User) -> List[Portfolio]:
     if not user or not user.username:
         raise UnsupportedPortfolioOperationError('A valid user is required to retrieve portfolios.')
-
     return db.session.query(Portfolio).filter_by(owner=user.username).all()
 
 
@@ -43,6 +41,8 @@ def delete_portfolio(portfolio_id: int) -> None:
     portfolio = db.session.query(Portfolio).filter_by(id=portfolio_id).one_or_none()
     if not portfolio:
         raise UnsupportedPortfolioOperationError(f'Portfolio with id {portfolio_id} does not exist')
-
+    if portfolio.investments and len(portfolio.investments) > 0:
+        raise PortfolioOperationError('Cannot delete a portfolio that still contains holdings. Please sell all positions first.')
+    db.session.query(Transaction).filter_by(portfolio_id=portfolio_id).delete()
     db.session.delete(portfolio)
     db.session.flush()
