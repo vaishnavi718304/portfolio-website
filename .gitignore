@@ -6,3 +6,6 @@ htmlcov/
 .env
 app/.env
 .DS_Store
+venv/
+instance/
+*.db
