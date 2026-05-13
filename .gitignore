@@ -9,3 +9,4 @@ app/.env
 venv/
 instance/
 *.db
+frontend/node_modules/
